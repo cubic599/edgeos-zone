@@ -1,0 +1,539 @@
+{# === Begin Macro ============================================================================= #}
+{% macro boolvar(cfgstring, value) %}
+{% if value is defined %}
+{% if value == true or value == false %}
+{{ cfgstring }}{{ value | lower}}
+{% else %}
+{% endif %}
+{% endif %}
+{% endmacro %}
+{# --------------------------------------------------------------------------------------------- #}
+{% macro checkable(cfgstring, value) %}
+{% if value is defined %}
+{% if value == 'enable' or value == 'disable' %}
+{{ cfgstring }}{{ value }}
+{% else %}
+{% endif %}
+{% endif %}
+{% endmacro %}
+{# === Firewall ================================================================================ #}
+{# --- Frewall Groups -------------------------------------------------------------------------- #}
+{% if erlcfg.firewall.group.address_group is defined %}
+{% for addr_grp in erlcfg.firewall.group.address_group %}
+set firewall group address-group {{ addr_grp.name }} description '{{ addr_grp.description }}'
+{% for addr in addr_grp.address %}
+set firewall group address-group {{ addr_grp.name }} address {{ addr }}
+{% endfor %}
+{% endfor %}
+{% endif %}
+{% if erlcfg.firewall.group.port_group is defined %}
+{% for port_grp in erlcfg.firewall.group.port_group %}
+{% if port_grp.name is defined and port_grp.description is defined %}
+set firewall group port-group {{ port_grp.name }} description '{{ port_grp.description }}'
+{% if port_grp.port is defined %}
+{% for pt in port_grp.port %}
+set firewall group port-group {{ port_grp.name }} port {{ pt }}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if erlcfg.firewall.group.network_group is defined %}
+{% for net_grp in erlcfg.firewall.group.network_group %}
+{% if net_grp.name is defined and net_grp.description is defined %}
+set firewall group network-group {{ net_grp.name }} description '{{ net_grp.description }}'
+{% if net_grp.network is defined %}
+{% for net in net_grp.network %}
+set firewall group network-group {{ net_grp.name }} network {{ net }}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{# --- Firewall rulesets ----------------------------------------------------------------------- #}
+{# --- Firewall rulesets header ---------------------------------------------------------------- #}
+{% if erlcfg.firewall.rulesets is defined %}
+{% for ruleset in erlcfg.firewall.rulesets %}
+{% if ruleset.description is defined and ruleset.default_action is defined %}
+set firewall name {{ ruleset.name }} description '{{ ruleset.description }}'
+set firewall name {{ ruleset.name }} default-action {{ ruleset.default_action }}
+{% if ruleset.enable_default_log is defined %}
+{% if ruleset.enable_default_log == true %}
+set firewall name {{ ruleset.name }} enable-default-log
+{% elif ruleset.enable_default_log == false %}
+delete firewall name {{ ruleset.name }} enable-default-log
+{% else %}
+{% endif %}
+{% endif %}
+{# --- Firewall Rulesets Defrules -------------------------------------------------------------- #}
+{% if erlcfg.firewall.defrules is defined %}
+{% for defrule in erlcfg.firewall.defrules %}
+{% if defrule.action is defined and defrule.states is defined %}
+set firewall name {{ ruleset.name }} rule {{ defrule.number }} action {{ defrule.action }}
+{% for state in defrule.states %}
+set firewall name {{ ruleset.name }} rule {{ defrule.number }} state {{ state }} enable
+{% endfor %}
+{% endif %}
+{% if defrule.log is defined %}
+{% if defrule.log == 'enable' or rule.log == 'disable' %}
+set firewall name {{ ruleset.name }} rule {{ defrule.number }} log {{ defrule.log }}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{# --- Firewall rulesets rules ----------------------------------------------------------------- #}
+{#
+{% if erlcfg.firewall.defrules is defined %}
+#}
+{% if ruleset.rules is defined %}
+{% for rule in ruleset.rules %}
+{% if rule.description is defined %}
+set firewall name {{ ruleset.name }} rule {{ rule.number }} description '{{ rule.description }}'
+{% endif %}
+{% if rule.action is defined %}
+set firewall name {{ ruleset.name }} rule {{ rule.number }} action {{ rule.action }}
+{% endif %}
+{% if rule.states is defined %}
+{% for state in rule.states %}
+set firewall name {{ ruleset.name }} rule {{ rule.number }} state {{ state }} enable
+{% endfor %}
+{% endif %}
+{% if rule.protocol is defined %}
+set firewall name {{ ruleset.name }} rule {{ rule.number }} protocol {{ rule.protocol }}
+{% if rule.protocol == 'icmp' and rule.icmp.type_name is defined %}
+set firewall name {{ ruleset.name }} rule {{ rule.number }} icmp type-name {{ rule.icmp.type_name }}
+{% endif %}
+{% endif %}
+{% if rule.log is defined %}
+{% if rule.log == 'enable' or rule.log == 'disable' %}
+set firewall name {{ ruleset.name }} rule {{ rule.number }} log {{ rule.log }}
+{% else %}
+{% endif %}
+{% endif %}
+{% if rule.source.port is defined %}
+set firewall name {{ ruleset.name }} rule {{ rule.number }} source port {{ rule.source.port }}
+{% endif %}
+{% if rule.source.address is defined %}
+set firewall name {{ ruleset.name }} rule {{ rule.number }} source address {{ rule.source.address }}
+{% endif %}
+{% if rule.source.group.port_group is defined %}
+set firewall name {{ ruleset.name }} rule {{ rule.number }} source group port-group {{ rule.source.group.port_group }}
+{% endif %}
+{% if rule.source.group.address_group is defined %}
+set firewall name {{ ruleset.name }} rule {{ rule.number }} source group address-group {{ rule.source.group.address_group }}
+{% endif %}
+{% if rule.source.group.network_group is defined %}
+set firewall name {{ ruleset.name }} rule {{ rule.number }} source group network-group {{ rule.source.group.network_group }}
+{% endif %}
+{% if rule.destination.port is defined %}
+set firewall name {{ ruleset.name }} rule {{ rule.number }} destination port {{ rule.destination.port }}
+{% endif %}
+{% if rule.destination.address is defined %}
+set firewall name {{ ruleset.name }} rule {{ rule.number }} destination address {{ rule.destination.address }}
+{% endif %}
+{% if rule.destination.group.port_group is defined %}
+set firewall name {{ ruleset.name }} rule {{ rule.number }} destination group port-group {{ rule.destination.group.port_group }}
+{% endif %}
+{% if rule.destination.group.address_group is defined %}
+set firewall name {{ ruleset.name }} rule {{ rule.number }} destination group address-group {{ rule.destination.group.address_group }}
+{% endif %}
+{% if rule.destination.group.network_group is defined %}
+set firewall name {{ ruleset.name }} rule {{ rule.number }} destination group network-group {{ rule.destination.group.network_group }}
+{% endif %}
+{# ----------------------------------------------------------------- Firewall Rulesets Rules --- #}
+{% endfor %}
+{% endif %}
+{# ---------------------------------------------------------------- Firewall rulesets header --- #}
+{% endif %}
+{% endfor %}
+{% endif %}
+{# === INTERFACES ============================================================================== #}
+{% if erlcfg.interfaces.ethernet is defined %}
+{% for eth_if in erlcfg.interfaces.ethernet %}
+{% if eth_if.description is defined and eth_if.address is defined %}
+set interfaces ethernet {{ eth_if.name }} description '{{ eth_if.description }}'
+set interfaces ethernet {{ eth_if.name }} address {{ eth_if.address }}
+{% endif %}
+{% if eth_if.disable is defined %}
+{% if eth_if.disable == true %}
+set interfaces ethernet {{ eth_if.name }} disable
+{% elif eth_if.disable == false %}
+delete interfaces ethernet {{ eth_if.name }} disable
+{% else %}
+{% endif %}
+{% endif %}
+{% if eth_if.vifs is defined %}
+{% for vif in eth_if.vifs %}
+set interfaces ethernet {{ eth_if.name }} vif {{ vif.number }} address {{ vif.address }}
+set interfaces ethernet {{ eth_if.name }} vif {{ vif.number }} description {{ vif.description }}
+{% if vif.disable is defined %}
+{% if vif.disable == true %}
+set interfaces ethernet {{ eth_if.name }} vif {{ vif.number }} disable
+{% elif vif.disable == false %}
+delete interfaces ethernet {{ eth_if.name }} vif {{ vif.number }} disable
+{% else %}
+{% endif %}
+{% endif %}
+{% if vif.firewall is defined %}
+{% if vif.firewall.in is defined %}
+{% if vif.firewall.in.modify is defined %}
+set interfaces ethernet {{ eth_if.name }} vif {{ vif.number }} firewall in modify {{ vif.firewall.in.modify }}
+{% endif %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{# --- Modify ---------------------------------------------------------------------------------- #}
+{% if erlcfg.firewall.modify is defined %}
+{% for item in erlcfg.firewall.modify %}
+{% if item.rules is defined %}
+{% for rule in item.rules %}
+set firewall modify {{ item.name }} rule {{ rule.number }} action {{ rule.action }}
+{# {% if rule.destination is defined %}
+{% if rule.destination.group is defined %} #}
+{% if rule.destination.group.network_group is defined %}
+set firewall modify {{ item.name }} rule {{ rule.number }} destination group network-group {{ rule.destination.group.network_group }}
+{% endif %}
+{% if rule.destination.group.address_group is defined %}
+set firewall modify {{ item.name }} rule {{ rule.number }} destination group address-group {{ rule.destination.group.address_group }}
+{% endif %}
+{# {% endif %}
+{% endif %} #}
+{% if rule.modify is defined %}
+{% if rule.modify.table is defined %}
+set firewall modify {{ item.name }} rule {{ rule.number }} modify table {{ rule.modify.table }}
+{% endif %}
+{% if rule.modify.lb_group is defined %}
+set firewall modify {{ item.name }} rule {{ rule.number }} modify lb-group {{ rule.modify.lb_group }}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{# --- End Modify ------------------------------------------------------------------------------ #}
+{# === End Firewall ============================================================================ #}
+{# === Load Balance ============================================================================ #}
+{% if erlcfg.load_balance.group is defined %}
+{% for grp in erlcfg.load_balance.group %}
+{% if grp.interface is defined %}
+{% for infa in grp.interface %}
+set load-balance group {{ grp.name }} interface {{ infa }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{# === End Load Balance ======================================================================== #}
+{# === Protocols =============================================================================== #}
+{# --- Static ---------------------------------------------------------------------------------- #}
+{% if erlcfg.protocols.static.routes is defined %}
+{% for route in erlcfg.protocols.static.routes %}
+{% if route.next_hopes is defined %}
+{% for next_hope in route.next_hopes %}
+set protocols static route {{ route.name }} next-hop {{ next_hope }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{# --- End Static------------------------------------------------------------------------------- #}
+{# === End Protocols =========================================================================== #}
+{# === Begin Services ========================================================================== #}
+{# --- DNS ------------------------------------------------------------------------------------- #}
+{% if erlcfg.service.dns.forwarding is defined %}
+{% if erlcfg.service.dns.forwarding.cache_size is defined %}
+set service dns forwarding cache-size {{ erlcfg.service.dns.forwarding.cache_size }}
+{% endif %}
+{% if erlcfg.service.dns.forwarding.listen_on is defined %}
+{% for interface in erlcfg.service.dns.forwarding.listen_on %}
+set service dns forwarding listen-on {{ interface }}
+{% endfor %}
+{% endif %}
+{% if erlcfg.service.dns.forwarding.name_server is defined %}
+{% for server in erlcfg.service.dns.forwarding.name_server %}
+set service dns forwarding name-server {{ server }}
+{% endfor %}
+{% endif %}
+{% endif %}
+{# --- GUI ------------------------------------------------------------------------------------- #}
+{% if erlcfg.service.gui.http_port is defined %}
+set service gui http-port {{ erlcfg.service.gui.http_port }}
+{% endif %}
+{% if erlcfg.service.gui.https_port is defined %}
+set service gui https-port {{ erlcfg.service.gui.https_port }}
+{% endif %}
+{% if erlcfg.service.gui.listen_address is defined %}
+set service gui listen-address {{ erlcfg.service.gui.listen_address }}
+{% endif %}
+{% if erlcfg.service.gui.older_ciphers is defined %}
+{% if erlcfg.service.gui.older_ciphers == 'enable' or  erlcfg.service.gui.older_ciphers == 'disable' %}
+set service gui older-ciphers {{ erlcfg.service.gui.older_ciphers }}
+{% endif %}
+{% endif %}
+{# --- NAT ------------------------------------------------------------------------------------- #}
+{% if erlcfg.service.nat is defined %}
+{% for natrule in erlcfg.service.nat %}
+{% if natrule.disable is defined and natrule.disable == false %}
+delete service nat rule {{ natrule.rule }} disable
+{% elif natrule.disable is defined %}
+set service nat rule {{ natrule.rule }} disable
+{% endif %}
+{% if natrule.description is defined %}
+set service nat rule {{ natrule.rule }} description '{{ natrule.description }}'
+{% endif %}
+{% if natrule.log.enable is defined %}
+set service nat rule {{ natrule.rule }} log enable
+{% elif natrule.log.disable is defined %}
+set service nat rule {{ natrule.rule }} log disable
+{% endif %}
+{% if natrule.protocol is defined %}
+set service nat rule {{ natrule.rule }} protocol {{ natrule.protocol }}
+{% endif %}
+{% if natrule.type.destination is defined %}
+set service nat rule {{ natrule.rule }} type destination
+{% elif natrule.type.source is defined %}
+set service nat rule {{ natrule.rule }} type source
+{% elif natrule.type.masquerade is defined %}
+set service nat rule {{ natrule.rule }} type masquerade
+{% endif %}
+{% if natrule.inbound_interface is defined %}
+set service nat rule {{ natrule.rule }} inbound-interface {{ natrule.inbound_interface }}
+{% endif %}
+{% if natrule.outbound_interface is defined %}
+set service nat rule {{ natrule.rule }} outbound-interface {{ natrule.outbound_interface }}
+{% endif %}
+{% if natrule.inside_address.address is defined and natrule.inside_address.port is defined %}
+set service nat rule {{ natrule.rule }} inside-address address {{ natrule.inside_address.address }}
+set service nat rule {{ natrule.rule }} inside-address port {{ natrule.inside_address.port }}
+{% endif %}
+{% if natrule.destination.address is defined %}
+set service nat rule {{ natrule.rule }} destination address {{ natrule.destination.address }}
+{% endif %}
+{% if natrule.destination.port is defined %}
+set service nat rule {{ natrule.rule }} destination port {{ natrule.destination.port }}
+{% endif %}
+{% if natrule.source.group.address_group is defined %}
+set service nat rule {{ natrule.rule }} source group address-group {{ natrule.source.group.address_group }}
+{% endif %}
+{% endfor %}
+{% endif %}
+{# --- SSH ------------------------------------------------------------------------------------- #}
+{% if erlcfg.service.ssh.disable_password_authentication is defined %}
+{% if erlcfg.service.ssh.disable_password_authentication == true %}
+set service ssh disable-password-authentication
+{% elif erlcfg.service.ssh.disable_password_authentication == false %}
+delete service ssh disable-password-authentication
+{% else %}
+{% endif %}
+{% endif %}
+{% if erlcfg.service.ssh.listen_address is defined %}
+{% for addr in erlcfg.service.ssh.listen_address %}
+set service ssh listen-address {{ addr }}
+{% endfor %}
+{% endif %}
+{% if erlcfg.service.ssh.port is defined %}
+set service ssh port {{ erlcfg.service.ssh.port }}
+{% endif %}
+{% if erlcfg.service.ssh.protocol_version is defined %}
+{% if erlcfg.service.ssh.protocol_version == 'all' or erlcfg.service.ssh.protocol_version == 'v1' or erlcfg.service.ssh.protocol_version == 'v2' %}
+set service ssh protocol-version {{ erlcfg.service.ssh.protocol_version }}
+{% endif %}
+{% endif %}
+{# --- Begin DHCP-Server Global----------------------------------------------------------------- #}
+{{ boolvar('set service dhcp-server disabled ', erlcfg.service.dhcp_server.disabled) -}}
+{{ checkable('set service dhcp-server use-dnsmasq ', erlcfg.service.dhcp_server.use_dnsmasq) -}}
+{{ checkable('set service dhcp-server hostfile-update ', erlcfg.service.dhcp_server.hostfile_update) -}}
+{{ checkable('set service dhcp-server static-arp ', erlcfg.service.dhcp_server.static_arp) -}}
+{# --- DHCP-Server - DHCP shared network ------------------------------------------------------- #}
+{% if erlcfg.service.dhcp_server.shared_networks is defined %}
+{% for shared_network in erlcfg.service.dhcp_server.shared_networks %}
+{% if shared_network.name is defined and shared_network.description is defined %}
+set service dhcp-server shared-network-name {{ shared_network.name }} description '{{ shared_network.description }}'
+{% if shared_network.disable is defined and shared_network.disable == true %}
+set service dhcp-server shared-network-name {{ shared_network.name }} disable
+{% elif shared_network.disable is defined and shared_network.disable == false %}
+delete service dhcp-server shared-network-name {{ shared_network.name }} disable
+{% else %}
+{% endif %}
+{% if shared_network.name is defined and shared_network.authoritative is defined and shared_network.authoritative == 'enable' or shared_network.authoritative == 'disable' %}
+set service dhcp-server shared-network-name {{ shared_network.name }} authoritative {{ shared_network.authoritative }}
+{% endif %}
+{% if shared_network.subnets is defined %}
+{% for subnet in shared_network.subnets %}
+{% if subnet.cidr is defined and subnet.ranges is defined or subnet.static_mappings is defined %}
+{% if subnet.ranges is defined %}
+{% for range in subnet.ranges %}
+set service dhcp-server shared-network-name {{ shared_network.name }} subnet {{ subnet.cidr }} start {{ range.start }} stop {{ range.stop }}
+{% endfor %}
+{% endif %}
+{% if subnet.default_router is defined %}
+set service dhcp-server shared-network-name {{ shared_network.name }} subnet {{ subnet.cidr }} default-router {{ subnet.default_router }}
+{% endif %}
+{% if subnet.dns_server is defined %}
+{% for dns_serv in subnet.dns_server %}
+set service dhcp-server shared-network-name {{ shared_network.name }} subnet {{ subnet.cidr }} dns-server {{ dns_serv }}
+{% endfor %}
+{% endif %}
+{% if subnet.ntp_server is defined %}
+{% for ntp_serv in subnet.ntp_server %}
+set service dhcp-server shared-network-name {{ shared_network.name }} subnet {{ subnet.cidr }} ntp-server {{ ntp_serv }}
+{% endfor %}
+{% endif %}
+{% if subnet.domain_name is defined %}
+set service dhcp-server shared-network-name {{ shared_network.name }} subnet {{ subnet.cidr }} domain-name {{ subnet.domain_name }}
+{% endif %}
+{% if subnet.lease_time is defined and subnet.lease_time > 0 %}
+set service dhcp-server shared-network-name {{ shared_network.name }} subnet {{ subnet.cidr }} lease {{ subnet.lease_time }}
+{% else %}
+{% endif %}
+{% if subnet.static_route.destination_subnet is defined and subnet.static_route.router is defined %}
+set service dhcp-server shared-network-name {{ shared_network.name }} subnet {{ subnet.cidr }} static-route destination-subnet {{ subnet.static_route.destination_subnet }}
+set service dhcp-server shared-network-name {{ shared_network.name }} subnet {{ subnet.cidr }} static-route router {{ subnet.static_route.router }}
+{% endif %}
+{# --- DHCP Static Mapping --------------------------------------------------------------------- #}
+{% if subnet.static_mappings is defined %}
+{% for static_mapping in subnet.static_mappings %}
+{% if static_mapping.name is defined and static_mapping.ip_address is defined and static_mapping.mac_address is defined %}
+set service dhcp-server shared-network-name {{ shared_network.name }} subnet {{ subnet.cidr }} static-mapping {{ static_mapping.name }} ip-address {{ static_mapping.ip_address }}
+set service dhcp-server shared-network-name {{ shared_network.name }} subnet {{ subnet.cidr }} static-mapping {{ static_mapping.name }} mac-address '{{ static_mapping.mac_address }}'
+{% endif %}
+{% if static_mapping.disable is defined and static_mapping.disable == true %}
+set service dhcp-server shared-network-name {{ shared_network.name }} subnet {{ subnet.cidr }} static-mapping {{ static_mapping.name }} disable
+{% elif static_mapping.disable is defined and static_mapping.disable == false %}
+delete service dhcp-server shared-network-name {{ shared_network.name }} subnet {{ subnet.cidr }} static-mapping {{ static_mapping.name }} disable
+{% else %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{# --- WEBPROXY -------------------------------------------------------------------------------- #}
+{% if erlcfg.service.webproxy.enable_access_log is defined %}
+{% if erlcfg.service.webproxy.enable_access_log == true %}
+set service webproxy enable-access-log
+{% elif erlcfg.service.webproxy.enable_access_log == false %}
+delete service webproxy enable-access-log
+{% else %}
+{% endif %}
+{% endif %}
+{% if erlcfg.service.webproxy.listen_addresses is defined %}
+{% for listaddr in erlcfg.service.webproxy.listen_addresses %}
+{% if listaddr.disable_transparent is defined or listaddr.port is defined %}
+{% if listaddr.disable_transparent == true %}
+set service webproxy listen-address {{ listaddr.address }} disable-transparent
+{% elif listaddr.disable_transparent == false %}
+delete service webproxy listen-address {{ listaddr.address }} disable-transparent
+{% else %}
+{% endif %}
+{% if listaddr.port is defined %}
+set service webproxy listen-address {{ listaddr.address }} port {{ listaddr.port }}
+{% endif %}
+{% else %}
+set service webproxy listen-address {{ listaddr.address }}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if erlcfg.service.webproxy.url_filtering.disable is defined %}
+{% if erlcfg.service.webproxy.url_filtering.disable == true %}
+set service webproxy url-filtering disable
+{% elif erlcfg.service.webproxy.url_filtering.disable == false %}
+delete service webproxy url-filtering disable
+{% if erlcfg.service.webproxy.url_filtering.squidguard.default_action == 'allow' %}
+set service webproxy url-filtering squidguard default-action allow
+{% elif erlcfg.service.webproxy.url_filtering.squidguard.default_action == 'block' %}
+set service webproxy url-filtering squidguard default-action block
+{% endif %}
+{% if erlcfg.service.webproxy.url_filtering.squidguard.redirect_url is defined %}
+set service webproxy url-filtering squidguard redirect-url '{{ erlcfg.service.webproxy.url_filtering.squidguard.redirect_url }}'
+{% endif %}
+{% if erlcfg.service.webproxy.url_filtering.squidguard.local_ok is defined %}
+{% for locok in erlcfg.service.webproxy.url_filtering.squidguard.local_ok %}
+set service webproxy url-filtering squidguard local-ok {{ locok }}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% endif %}
+{# === End Services ============================================================================ #}
+{# === System ================================================================================== #}
+{#
+{% if erlcfg.system.gateway is defined %}
+set system gateway-address {{ erlcfg.system.gateway }}
+{% endif %}
+{% if erlcfg.system.domain_search is defined %}
+{% for dom in erlcfg.system.domain_search %}
+set system domain-search domain {{ dom }}
+{% endfor %}
+{% endif %}
+#}
+{% if erlcfg.system.domain_name is defined %}
+set system domain-name {{ erlcfg.system.domain_name }}
+{% endif %}
+{% if erlcfg.system.hostname is defined %}
+set system host-name {{ erlcfg.system.hostname }}
+{% endif %}
+{% if erlcfg.system.name_servers is defined %}
+{% for name_server in erlcfg.system.name_servers %}
+set system name-server {{ name_server }}
+{% endfor %}
+{% endif %}
+{% if erlcfg.system.offload.hwnat is defined %}
+set system offload hwnat {{ erlcfg.system.offload.hwnat }}
+{% endif %}
+{% if erlcfg.system.offload.ipv4 is defined %}
+{% for ipv4_item in erlcfg.system.offload.ipv4 %}
+set system offload ipv4 {{ ipv4_item.name }} {{ ipv4_item.state }}
+{% endfor %}
+{% endif %}
+{% if erlcfg.system.static_host_mapping is defined %}
+{% for hostmap in erlcfg.system.static_host_mapping %}
+set system static-host-mapping host-name {{ hostmap.host_name }} inet {{ hostmap.inet }}
+{% endfor %}
+{% endif %}
+{% if erlcfg.system.time_zone is defined %}
+set system time-zone {{ erlcfg.system.time_zone }}
+{% endif %}
+{# --- Login ----------------------------------------------------------------------------------- #}
+{% if erlcfg.system.login.users is defined %}
+{% for user in erlcfg.system.login.users %}
+{# set system login user {{ user.name }} level admin #}
+{% if user.public_keys is defined %}
+{% for pubkey in user.public_keys %}
+set system login user {{ user.name }} authentication public-keys {{ pubkey.name }} type {{ pubkey.type }}
+set system login user {{ user.name }} authentication public-keys {{ pubkey.name }} key {{ pubkey.key }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{# --- Login End ------------------------------------------------------------------------------- #}
+{# === Zone Policy Start ======================================================================= #}
+{% if erlcfg.zones is defined %}
+{% for zone in erlcfg.zones %}
+{% if zone.description is defined and zone.default_action is defined %}
+set zone-policy zone {{ zone.name }} description '{{ zone.description }}'
+set zone-policy zone {{ zone.name }} default-action {{ zone.default_action }}
+{% if zone.interfaces is defined %}
+{% for interface in zone.interfaces %}
+set zone-policy zone {{ zone.name }} interface {{ interface }}
+{% endfor %}
+{% elif zone.local is defined %}
+{% if zone.local == true %}
+set zone-policy zone {{ zone.name }} local-zone
+{% elif zone.local == false %}
+delete zone-policy zone {{ zone.name }} local-zone
+{% endif %}
+{% endif %}
+{% if zone.from_zones is defined %}
+{% for from_zone in zone.from_zones %}
+{% if from_zone.firewall.ipv4_ruleset is defined %}
+set zone-policy zone {{ zone.name }} from {{ from_zone.name }} firewall name {{ from_zone.firewall.ipv4_ruleset }}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}

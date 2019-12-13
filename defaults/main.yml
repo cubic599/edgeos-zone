@@ -1,0 +1,8 @@
+---
+# defaults file for erl-cfg-zone
+
+erlcfg_service_ssh_port: 50222
+erlcfg_service_dns_forwarding_name_server:
+  - 9.9.9.9
+  - 1.1.1.1
+  - 8.8.8.8

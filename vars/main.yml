@@ -1,0 +1,11 @@
+---
+# vars file for erl-cfg-zone
+
+erlcfg_service_gui_http_port: 8097
+erlcfg_service_gui_https_port: 4430
+erlcfg__service__gui__older_ciphers: disable
+erlcfg_service_ssh_disable_password_authentication: true
+erlcfg__service__ssh__protocol_version: v2
+ERLCFG__SERVICE_WEBPROXY_PORT: 3128
+erlcfg_system_time_zone: Europe/Moscow
+erlcfg_service_dns_forwarding_cache_size: 999
