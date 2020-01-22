@@ -1,44 +1,17 @@
-#---
-# tasks file for richardhofman.edgeos_router
-# tasks file for erl
+---
+# tasks file for edgeos-zone
 
 - name: Backup config
   edgeos_config:
     backup: yes
     backup_options:
-      filename: config.boot.command.{{ ansible_host }}
+      filename: config.boot.command.{{ erlcfg.system.hostname }}.{{ erlcfg.system.domain_name }}
       dir_path: /home/user/erl/backup
 
-#~ - name: Generate common configuration file.
-#~ ##  local_action:
-  #~ template:
-    #~ src: er_cfg_cmmn.j2
-#~ #    dest: /tmp/erl_config.txt
-    #~ dest: ~/_tmp/erl_cfg_cmmn.txt
-
-#~ - name: Push configuration to router.
-  #~ edgeos_config:
-#~ #    backup: yes
-    #~ src: ~/_tmp/erl_cfg_cmmn.txt
-
-#- name: Delete config file.
-#  local_action:
-#    file:
-#      path: /tmp/er_config.txt
-#      state: absent
-
-- name: Generate configuration file.
-  template:
-    src: ercfgz.j2
-    dest: ~/_ans_tmp/ercfgz-{{ ansible_host }}.cfg
-    when: TEMPLATE_VERSION is not defined
-
-- name: Generate configuration file.
-  template:
-    src: config.boot-1.j2
-    dest: ~/_ans_tmp/ercfgz-{{ ansible_host }}.cfg
-    when: TEMPLATE_VERSION == 1
+- include: tmpl_v1.yml
+  when: > 
+    TEMPLATE_VERSION == 1
 
 - name: Push configuration to router.
   edgeos_config:
-    src: ~/_ans_tmp/ercfgz-{{ ansible_host }}.cfg
+    src: ~/_ans_tmp/config.boot-{{ erlcfg.system.hostname }}.{{ erlcfg.system.domain_name }}

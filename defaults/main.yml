@@ -6,3 +6,5 @@ erlcfg_service_dns_forwarding_name_server:
   - 9.9.9.9
   - 1.1.1.1
   - 8.8.8.8
+
+ERL_SSH_PORT: 42200

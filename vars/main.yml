@@ -9,3 +9,23 @@ erlcfg__service__ssh__protocol_version: v2
 ERLCFG__SERVICE_WEBPROXY_PORT: 3128
 erlcfg_system_time_zone: Europe/Moscow
 erlcfg_service_dns_forwarding_cache_size: 999
+
+NAT_RULE_TYPES:
+  - destination
+  - source
+  - masquerade
+
+GLOBAL_PROTO:
+  - tcp
+  - udp
+  - tcp_udp
+  - all
+
+GLOBAL_ABLE:
+  - enable
+  - disable
+
+SSH_PROTO_VERSION:
+  - v1
+  - v2
+  - all
