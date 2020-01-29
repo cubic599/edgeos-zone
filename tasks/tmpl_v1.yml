@@ -1,0 +1,5 @@
+---
+- name: Generate configuration file. | Template version 1.
+  template:
+    src: config.boot-v1.j2
+    dest: ~/_ans_tmp/config.boot-{{ erlcfg.system.hostname }}.{{ erlcfg.system.domain_name }}

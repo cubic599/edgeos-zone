@@ -5,7 +5,8 @@
   edgeos_config:
     backup: yes
     backup_options:
-      filename: config.boot.command.{{ erlcfg.system.hostname }}.{{ erlcfg.system.domain_name }}
+      filename: config.boot.{{ erlcfg.system.hostname }}.{{ erlcfg.system.domain_name }}
+      #filename: config.boot.lalala
       dir_path: /home/user/erl/backup
 
 - include: tmpl_v1.yml
