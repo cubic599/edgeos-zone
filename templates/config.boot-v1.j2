@@ -1,4 +1,5 @@
 {# EdgeOS Template v1 #}
+{% if erlcfg is defined %}
 {# === Begin Macro ============================================================================= #}
 {% macro boolvar(cfgstring, value) %}
 {% if value is defined %}
@@ -443,7 +444,6 @@ set service ssh protocol-version {{ erlcfg.service.ssh.protocol_version }}
 set service webproxy enable-access-log
 {% elif erlcfg.service.webproxy.enable_access_log == false %}
 delete service webproxy enable-access-log
-{% else %}
 {% endif %}
 {% endif %}
 {% if erlcfg.service.webproxy.listen_addresses is defined %}
@@ -553,3 +553,4 @@ set zone-policy zone {{ zone.name }} from {{ from_zone.name }} firewall name {{ 
 {% endfor %}
 {% endif %}
 {# ============================================================================= Zone Policy === #}
+{% endif %}

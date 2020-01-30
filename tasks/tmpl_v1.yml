@@ -3,3 +3,9 @@
   template:
     src: config.boot-v1.j2
     dest: ~/_ans_tmp/config.boot-{{ erlcfg.system.hostname }}.{{ erlcfg.system.domain_name }}
+    #~ dest: /tmp/lalala.txt
+  #~ register: result99
+  #~ debugger: always
+  
+#~ - name: Debug registered var
+  #~ debug: var=result99
