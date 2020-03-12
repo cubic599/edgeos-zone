@@ -5,14 +5,21 @@
   edgeos_config:
     backup: yes
     backup_options:
-      dir_path: ~/_erl_other/backup
-      #~ filename: config.boot.command.{{ erlcfg.system.hostname }}.{{ erlcfg.system.domain_name }}
+      dir_path: ~/_erl_backup
+      #~ filename: config.boot-cmd-{{ erlcfg.system.hostname }}.{{ erlcfg.system.domain_name }}
 
 - name: Template | Version 1
   include: tmpl_v1.yml
   when: > 
     TEMPLATE_VERSION is defined and
     TEMPLATE_VERSION == 1
+
+- name: Generate configuration file. | Template version Zero (0).
+  template:
+    src: ercfgz.j2
+    dest: ~/_ans_tmp/config.boot-{{ erlcfg.system.hostname }}.{{ erlcfg.system.domain_name }}
+  when: >
+    TEMPLATE_VERSION is not defined
 
 - name: Push configuration to router.
   edgeos_config:

@@ -234,6 +234,11 @@ set interfaces openvpn {{ ovpn_if.name }} description {{ ovpn_if.description }}
 {% if ovpn_if.config_file is defined %}
 set interfaces openvpn {{ ovpn_if.name }} config-file {{ ovpn_if.config_file }}
 {% endif %}
+{% if ovpn_if.disable == true %}
+set interfaces openvpn {{ ovpn_if.name }} disable
+{% elif ovpn_if.disable == false %}
+delete interfaces openvpn {{ ovpn_if.name }} disable
+{% endif%}
 {% endfor %}
 {% endif %}
 {# === Load Balance ============================================================================ #}
@@ -311,6 +316,9 @@ set service dhcp-server shared-network-name {{ shared_network.name }} subnet {{ 
 {% if subnet.static_route.destination_subnet is defined and subnet.static_route.router is defined %}
 set service dhcp-server shared-network-name {{ shared_network.name }} subnet {{ subnet.cidr }} static-route destination-subnet {{ subnet.static_route.destination_subnet }}
 set service dhcp-server shared-network-name {{ shared_network.name }} subnet {{ subnet.cidr }} static-route router {{ subnet.static_route.router }}
+{% endif %}
+{% if subnet.unifi_controller is defined %}
+set service dhcp-server shared-network-name {{ shared_network.name }} subnet {{ subnet.cidr }} unifi-controller {{ subnet.unifi_controller }}
 {% endif %}
 {# --- DHCP Static Mapping --------------------------------------------------------------------- #}
 {% if subnet.static_mappings is defined %}
