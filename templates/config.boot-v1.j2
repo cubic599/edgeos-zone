@@ -86,16 +86,16 @@ set firewall modify {{ item.name }} rule {{ rule.number }} modify lb-group {{ ru
 {# --- Firewall rulesets header ---------------------------------------------------------------- #}
 {% if erlcfg.firewall.rulesets is defined %}
 {% for ruleset in erlcfg.firewall.rulesets %}
-{% if ruleset.description is defined and ruleset.default_action is defined %}
+{% if ruleset.description is defined %}
 set firewall name {{ ruleset.name }} description '{{ ruleset.description }}'
-set firewall name {{ ruleset.name }} default-action {{ ruleset.default_action }}
-{% if ruleset.enable_default_log is defined %}
-{% if ruleset.enable_default_log == true %}
-set firewall name {{ ruleset.name }} enable-default-log
-{% elif ruleset.enable_default_log == false %}
-delete firewall name {{ ruleset.name }} enable-default-log
-{% else %}
 {% endif %}
+{% if ruleset.default_action is defined %}
+set firewall name {{ ruleset.name }} default-action {{ ruleset.default_action }}
+{% endif %}
+{% if ruleset.enable_default_log is defined and ruleset.enable_default_log == true %}
+set firewall name {{ ruleset.name }} enable-default-log
+{% elif ruleset.enable_default_log is defined and ruleset.enable_default_log == false %}
+delete firewall name {{ ruleset.name }} enable-default-log
 {% endif %}
 {# --- Firewall Rulesets Defrules -------------------------------------------------------------- #}
 {% if erlcfg.firewall.defrules is defined %}
@@ -122,8 +122,19 @@ set firewall name {{ ruleset.name }} rule {{ defrule.number }} log {{ defrule.lo
 {% if rule.description is defined %}
 set firewall name {{ ruleset.name }} rule {{ rule.number }} description '{{ rule.description }}'
 {% endif %}
+{% if rule.disable is defined and rule.disable == true %}
+set firewall name {{ ruleset.name }} rule {{ rule.number }} disable
+{% elif rule.disable is defined and rule.disable == false %}
+delete firewall name {{ ruleset.name }} rule {{ rule.number }} disable
+{% endif %}
 {% if rule.action is defined %}
 set firewall name {{ ruleset.name }} rule {{ rule.number }} action {{ rule.action }}
+{% endif %}
+{% if rule.log is defined %}
+{% if rule.log == 'enable' or rule.log == 'disable' %}
+set firewall name {{ ruleset.name }} rule {{ rule.number }} log {{ rule.log }}
+{% else %}
+{% endif %}
 {% endif %}
 {% if rule.states is defined %}
 {% for state in rule.states %}
@@ -134,12 +145,6 @@ set firewall name {{ ruleset.name }} rule {{ rule.number }} state {{ state }} en
 set firewall name {{ ruleset.name }} rule {{ rule.number }} protocol {{ rule.protocol }}
 {% if rule.protocol == 'icmp' and rule.icmp.type_name is defined %}
 set firewall name {{ ruleset.name }} rule {{ rule.number }} icmp type-name {{ rule.icmp.type_name }}
-{% endif %}
-{% endif %}
-{% if rule.log is defined %}
-{% if rule.log == 'enable' or rule.log == 'disable' %}
-set firewall name {{ ruleset.name }} rule {{ rule.number }} log {{ rule.log }}
-{% else %}
 {% endif %}
 {% endif %}
 {% if rule.source.port is defined %}
@@ -176,20 +181,20 @@ set firewall name {{ ruleset.name }} rule {{ rule.number }} destination group ne
 {% endfor %}
 {% endif %}
 {# ---------------------------------------------------------------- Firewall rulesets header --- #}
-{% endif %}
+
 {% endfor %}
 {% endif %}
+
 {# === End Firewall ============================================================================ #}
-{#
-=== INTERFACES ===
-#}
-{#
---- Ethernet ---
-#}
+
+{# === INTERFACES === #}
+{# --- Ethernet --- #}
 {% if erlcfg.interfaces.ethernet is defined %}
 {% for eth_if in erlcfg.interfaces.ethernet %}
-{% if eth_if.description is defined and eth_if.address is defined %}
+{% if eth_if.description is defined %}
 set interfaces ethernet {{ eth_if.name }} description '{{ eth_if.description }}'
+{% endif %}
+{% if  eth_if.address is defined %}
 set interfaces ethernet {{ eth_if.name }} address {{ eth_if.address }}
 {% endif %}
 {% if eth_if.disable is defined %}
@@ -203,7 +208,7 @@ delete interfaces ethernet {{ eth_if.name }} disable
 {% if eth_if.vifs is defined %}
 {% for vif in eth_if.vifs %}
 set interfaces ethernet {{ eth_if.name }} vif {{ vif.number }} address {{ vif.address }}
-set interfaces ethernet {{ eth_if.name }} vif {{ vif.number }} description {{ vif.description }}
+set interfaces ethernet {{ eth_if.name }} vif {{ vif.number }} description '{{ vif.description }}'
 {% if vif.disable is defined %}
 {% if vif.disable == true %}
 set interfaces ethernet {{ eth_if.name }} vif {{ vif.number }} disable
@@ -217,15 +222,21 @@ delete interfaces ethernet {{ eth_if.name }} vif {{ vif.number }} disable
 {% if vif.firewall.in.modify is defined %}
 set interfaces ethernet {{ eth_if.name }} vif {{ vif.number }} firewall in modify {{ vif.firewall.in.modify }}
 {% endif %}
+{% if vif.firewall.in.ipv4_ruleset is defined %}
+set interfaces ethernet {{ eth_if.name }} vif {{ vif.number }} firewall in name {{ vif.firewall.in.ipv4_ruleset }}
+{% endif %}
+{% endif %}
+{% if vif.firewall.local is defined %}
+{% if vif.firewall.local.ipv4_ruleset is defined %}
+set interfaces ethernet {{ eth_if.name }} vif {{ vif.number }} firewall local name {{ vif.firewall.local.ipv4_ruleset }}
+{% endif %}
 {% endif %}
 {% endif %}
 {% endfor %}
 {% endif %}
 {% endfor %}
 {% endif %}
-{#
---- OpenVPN ---
-#}
+{# --- OpenVPN --- #}
 {% if erlcfg.interfaces.openvpn is defined %}
 {% for ovpn_if in erlcfg.interfaces.openvpn %}
 {% if ovpn_if.name is defined and ovpn_if.description is defined %}
@@ -234,11 +245,13 @@ set interfaces openvpn {{ ovpn_if.name }} description {{ ovpn_if.description }}
 {% if ovpn_if.config_file is defined %}
 set interfaces openvpn {{ ovpn_if.name }} config-file {{ ovpn_if.config_file }}
 {% endif %}
+{% if ovpn_if.disable is defined %}
 {% if ovpn_if.disable == true %}
 set interfaces openvpn {{ ovpn_if.name }} disable
 {% elif ovpn_if.disable == false %}
 delete interfaces openvpn {{ ovpn_if.name }} disable
 {% endif%}
+{% endif %}
 {% endfor %}
 {% endif %}
 {# === Load Balance ============================================================================ #}

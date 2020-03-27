@@ -8,3 +8,24 @@ erlcfg_service_dns_forwarding_name_server:
   - 8.8.8.8
 
 ERL_SSH_PORT: 42200
+
+ercfg:
+
+  interfaces:
+
+    ethernet:
+
+      - name: eth0
+        description: ETH0
+        disable: no
+        vifs:
+
+          - number: "{{ if_mng3.vif }}"
+            description: "{{ if_mng3.name }}"
+            disable: yes
+            address: "{{ if_mng3.ipv4_addr }}/{{ if_mng3.cidr }}"
+            firewall:
+              in:
+                ipv4_ruleset: 
+              local:
+                ipv4_ruleset: MNG__OCA

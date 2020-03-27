@@ -5,8 +5,10 @@
   edgeos_config:
     backup: yes
     backup_options:
-      dir_path: ~/_erl_backup
-      #~ filename: config.boot-cmd-{{ erlcfg.system.hostname }}.{{ erlcfg.system.domain_name }}
+      #~ dir_path: "/home/user/_erl_backup/{{ erlcfg.system.domain_name }}/"
+      dir_path: /home/user/erl/backup/
+      #~ filename: "config.boot-cmd-{{ erlcfg.system.hostname }}.{{ erlcfg.system.domain_name }}"
+      filename: "config.boot-{{ erlcfg.system.hostname }}.{{ erlcfg.system.domain_name }}"
 
 - name: Generate configuration file. | Template version Zero (0).
   template:
@@ -16,11 +18,10 @@
     TEMPLATE_VERSION is not defined
 
 - name: Template | Version 1
-  #~ include: tmpl_v1.yml
   template:
     src: config.boot-v1.j2
     dest: ~/_ans_tmp/config.boot-{{ erlcfg.system.hostname }}.{{ erlcfg.system.domain_name }}
-  when: > 
+  when: >
     TEMPLATE_VERSION is defined and
     TEMPLATE_VERSION == 1
 
