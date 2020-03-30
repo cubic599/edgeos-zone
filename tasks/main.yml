@@ -5,9 +5,7 @@
   edgeos_config:
     backup: yes
     backup_options:
-      #~ dir_path: "/home/user/_erl_backup/{{ erlcfg.system.domain_name }}/"
-      dir_path: /home/user/erl/backup/
-      #~ filename: "config.boot-cmd-{{ erlcfg.system.hostname }}.{{ erlcfg.system.domain_name }}"
+      dir_path: backup/
       filename: "config.boot-{{ erlcfg.system.hostname }}.{{ erlcfg.system.domain_name }}"
 
 - name: Generate configuration file. | Template version Zero (0).

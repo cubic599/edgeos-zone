@@ -9,7 +9,7 @@ erlcfg_service_dns_forwarding_name_server:
 
 ERL_SSH_PORT: 42200
 
-ercfg:
+ercfgz:
 
   interfaces:
 

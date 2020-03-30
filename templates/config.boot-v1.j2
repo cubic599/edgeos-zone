@@ -181,12 +181,9 @@ set firewall name {{ ruleset.name }} rule {{ rule.number }} destination group ne
 {% endfor %}
 {% endif %}
 {# ---------------------------------------------------------------- Firewall rulesets header --- #}
-
 {% endfor %}
 {% endif %}
-
 {# === End Firewall ============================================================================ #}
-
 {# === INTERFACES === #}
 {# --- Ethernet --- #}
 {% if erlcfg.interfaces.ethernet is defined %}
@@ -391,7 +388,7 @@ set service gui older-ciphers {{ erlcfg.service.gui.older_ciphers }}
 {% if rule.disable is defined and rule.disable == false %}
 delete service nat rule {{ rule.number }} disable
 {% elif rule.disable is defined and rule.disable == true %}
-set service nat rule {{ rule.rule }} disable
+set service nat rule {{ rule.number }} disable
 {% endif %}
 {% if rule.description is defined %}
 set service nat rule {{ rule.number }} description '{{ rule.description }}'
